@@ -473,8 +473,74 @@
         <div class="summary-label">人件費合計</div>
         <div class="summary-value" id="m_staff_total">0</div>
       </div>
+
+      <div class="summary-line">
+        <div class="summary-label">仕入れ合計</div>
+        <div class="summary-value" id="m_exp_shiire_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">雑費合計</div>
+        <div class="summary-value" id="m_exp_zappi_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">水道光熱費合計</div>
+        <div class="summary-value" id="m_exp_suido_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">家賃合計</div>
+        <div class="summary-value" id="m_exp_yachin_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">役員報酬合計</div>
+        <div class="summary-value" id="m_exp_yakuin_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">社員給与合計</div>
+        <div class="summary-value" id="m_exp_shain_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">ガソリン代合計</div>
+        <div class="summary-value" id="m_exp_gas_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">交通費合計</div>
+        <div class="summary-value" id="m_exp_kotsu_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">福利厚生費合計</div>
+        <div class="summary-value" id="m_exp_fukuri_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">損保合計</div>
+        <div class="summary-value" id="m_exp_sonpo_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">リース合計</div>
+        <div class="summary-value" id="m_exp_lease_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">社会保険合計</div>
+        <div class="summary-value" id="m_exp_shahoken_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">通信費合計</div>
+        <div class="summary-value" id="m_exp_tsushin_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">市税合計</div>
+        <div class="summary-value" id="m_exp_shizei_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">金融公庫合計</div>
+        <div class="summary-value" id="m_exp_kokko_total">0</div>
+      </div>
       <div class="summary-line">
         <div class="summary-label">その他経費合計</div>
+        <div class="summary-value" id="m_exp_other_total">0</div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">人件費以外の経費合計</div>
         <div class="summary-value" id="m_otherexp_total">0</div>
       </div>
       <div class="summary-line">
@@ -995,6 +1061,24 @@
       setText("m_fee_qr", 0);
       setText("m_fee_total", 0);
       setText("m_staff_total", 0);
+
+      setText("m_exp_shiire_total", 0);
+      setText("m_exp_zappi_total", 0);
+      setText("m_exp_suido_total", 0);
+      setText("m_exp_yachin_total", 0);
+      setText("m_exp_yakuin_total", 0);
+      setText("m_exp_shain_total", 0);
+      setText("m_exp_gas_total", 0);
+      setText("m_exp_kotsu_total", 0);
+      setText("m_exp_fukuri_total", 0);
+      setText("m_exp_sonpo_total", 0);
+      setText("m_exp_lease_total", 0);
+      setText("m_exp_shahoken_total", 0);
+      setText("m_exp_tsushin_total", 0);
+      setText("m_exp_shizei_total", 0);
+      setText("m_exp_kokko_total", 0);
+      setText("m_exp_other_total", 0);
+
       setText("m_otherexp_total", 0);
       setText("m_exp_total", 0);
       setText("m_net_sales_total", 0);
@@ -1013,7 +1097,7 @@
         return;
       }
 
-      const prefix = mv; // "YYYY-MM"
+      const prefix = mv;
       const dates = Object.keys(all).filter(d => d.startsWith(prefix)).sort();
 
       if (dates.length === 0) {
@@ -1037,6 +1121,24 @@
       let fee_total_all = 0;
 
       let staff_total_all = 0;
+
+      let exp_shiire_total_all = 0;
+      let exp_zappi_total_all = 0;
+      let exp_suido_total_all = 0;
+      let exp_yachin_total_all = 0;
+      let exp_yakuin_total_all = 0;
+      let exp_shain_total_all = 0;
+      let exp_gas_total_all = 0;
+      let exp_kotsu_total_all = 0;
+      let exp_fukuri_total_all = 0;
+      let exp_sonpo_total_all = 0;
+      let exp_lease_total_all = 0;
+      let exp_shahoken_total_all = 0;
+      let exp_tsushin_total_all = 0;
+      let exp_shizei_total_all = 0;
+      let exp_kokko_total_all = 0;
+      let exp_other_amount_total_all = 0;
+
       let otherexp_total_all = 0;
       let exp_total_all = 0;
 
@@ -1128,6 +1230,24 @@
         fee_total_all += fee_total;
 
         staff_total_all += staff_total;
+
+        exp_shiire_total_all += exp_shiire;
+        exp_zappi_total_all += exp_zappi;
+        exp_suido_total_all += exp_suido;
+        exp_yachin_total_all += exp_yachin;
+        exp_yakuin_total_all += exp_yakuin;
+        exp_shain_total_all += exp_shain;
+        exp_gas_total_all += exp_gas;
+        exp_kotsu_total_all += exp_kotsu;
+        exp_fukuri_total_all += exp_fukuri;
+        exp_sonpo_total_all += exp_sonpo;
+        exp_lease_total_all += exp_lease;
+        exp_shahoken_total_all += exp_shahoken;
+        exp_tsushin_total_all += exp_tsushin;
+        exp_shizei_total_all += exp_shizei;
+        exp_kokko_total_all += exp_kokko;
+        exp_other_amount_total_all += exp_other_amount;
+
         otherexp_total_all += otherExpTotal;
         exp_total_all += expense_total;
 
@@ -1148,6 +1268,24 @@
       setText("m_fee_qr", fee_qr_total);
       setText("m_fee_total", fee_total_all);
       setText("m_staff_total", staff_total_all);
+
+      setText("m_exp_shiire_total", exp_shiire_total_all);
+      setText("m_exp_zappi_total", exp_zappi_total_all);
+      setText("m_exp_suido_total", exp_suido_total_all);
+      setText("m_exp_yachin_total", exp_yachin_total_all);
+      setText("m_exp_yakuin_total", exp_yakuin_total_all);
+      setText("m_exp_shain_total", exp_shain_total_all);
+      setText("m_exp_gas_total", exp_gas_total_all);
+      setText("m_exp_kotsu_total", exp_kotsu_total_all);
+      setText("m_exp_fukuri_total", exp_fukuri_total_all);
+      setText("m_exp_sonpo_total", exp_sonpo_total_all);
+      setText("m_exp_lease_total", exp_lease_total_all);
+      setText("m_exp_shahoken_total", exp_shahoken_total_all);
+      setText("m_exp_tsushin_total", exp_tsushin_total_all);
+      setText("m_exp_shizei_total", exp_shizei_total_all);
+      setText("m_exp_kokko_total", exp_kokko_total_all);
+      setText("m_exp_other_total", exp_other_amount_total_all);
+
       setText("m_otherexp_total", otherexp_total_all);
       setText("m_exp_total", exp_total_all);
       setText("m_net_sales_total", net_sales_total);
