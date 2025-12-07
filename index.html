@@ -424,9 +424,18 @@
       </div>
 
       <div class="summary-line">
+        <div class="summary-label">店内売上合計</div>
+        <div class="summary-value" id="m_sales_dine_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">テイクアウト売上合計</div>
+        <div class="summary-value" id="m_sales_take_total">0</div>
+      </div>
+      <div class="summary-line">
         <div class="summary-label">売上合計</div>
         <div class="summary-value" id="m_sales_total">0</div>
       </div>
+
       <div class="summary-line">
         <div class="summary-label">現金合計</div>
         <div class="summary-value" id="m_cash_total">0</div>
@@ -1049,6 +1058,8 @@
 
     function zeroMonthly() {
       setText("m_days", 0);
+      setText("m_sales_dine_total", 0);
+      setText("m_sales_take_total", 0);
       setText("m_sales_total", 0);
       setText("m_cash_total", 0);
       setText("m_cc_total", 0);
@@ -1107,6 +1118,8 @@
       }
 
       let days = 0;
+      let sales_dine_total = 0;
+      let sales_take_total = 0;
       let sales_total = 0;
       let cash_total = 0;
       let cc_total = 0;
@@ -1216,6 +1229,8 @@
         const profit = net_sales - expense_total;
 
         days += 1;
+        sales_dine_total += sum_dine;
+        sales_take_total += sum_take;
         sales_total += sum_sales;
         cash_total += sum_cash;
         cc_total += sum_cc;
@@ -1256,6 +1271,8 @@
       });
 
       setText("m_days", days);
+      setText("m_sales_dine_total", sales_dine_total);
+      setText("m_sales_take_total", sales_take_total);
       setText("m_sales_total", sales_total);
       setText("m_cash_total", cash_total);
       setText("m_cc_total", cc_total);
