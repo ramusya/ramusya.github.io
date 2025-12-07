@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>お店収支管理 簡易版（月次集計つき）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    h1 {
+      font-size: 22px;
+      text-align: center;
+      margin: 8px 0 12px;
+    }
+    h2 {
+      font-size: 16px;
+      margin: 10px 0 6px;
+      border-left: 4px solid #007aff;
+      padding-left: 6px;
+    }
+    h3 {
+      font-size: 14px;
+      margin: 8px 0 4px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .field {
+      flex: 1 1 130px;
+      min-width: 120px;
+    }
+    label {
+      font-size: 11px;
+      display: block;
+      margin-bottom: 2px;
+    }
+    input[type="number"],
+    input[type="text"],
+    input[type="date"],
+    input[type="month"],
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type="number"] { text-align: right; }
+    .small-note {
+      font-size: 11px;
+      color: #777;
+      margin-top: 2px;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    button {
+      border: none;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .primary { background: #007aff; color: #fff; }
+    .secondary { background: #eee; color: #333; }
+    .danger { background: #ff3b30; color: #fff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 3px 4px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    th.left, td.left { text-align: left; }
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .summary-label { color: #555; }
+    .summary-value { font-weight: bold; }
+    .status {
+      font-size: 12px;
+      margin-top: 6px;
+      color: #007aff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>お店収支管理 簡易版</h1>
+
+    <div class="card">
+      <h2>基本設定</h2>
+      <div class="row">
+        <div class="field">
+          <label for="dateInput">日付</label>
+          <input type="date" id="dateInput">
+        </div>
+        <div class="field">
+          <label for="qrRateInput">QR決済 手数料率（％）</label>
+          <input type="number" id="qrRateInput" step="0.01" value="3.24">
+          <div class="small-note">必要に応じて修正</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>売上入力</h2>
+
+      <h3>店内</h3>
+      <div class="row">
+        <div class="field">
+          <label for="dine_cash">現金</label>
+          <input type="number" id="dine_cash" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="dine_cc">Airペイ クレカ</label>
+          <input type="number" id="dine_cc" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="dine_id">Airペイ iD／QUICPay</label>
+          <input type="number" id="dine_id" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="dine_transit">Airペイ 交通系</label>
+          <input type="number" id="dine_transit" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="dine_qr">QR決済</label>
+          <input type="number" id="dine_qr" min="0" step="1">
+        </div>
+      </div>
+
+      <h3>テイクアウト</h3>
+      <div class="row">
+        <div class="field">
+          <label for="take_cash">現金</label>
+          <input type="number" id="take_cash" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="take_cc">Airペイ クレカ</label>
+          <input type="number" id="take_cc" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="take_id">Airペイ iD／QUICPay</label>
+          <input type="number" id="take_id" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="take_transit">Airペイ 交通系</label>
+          <input type="number" id="take_transit" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="take_qr">QR決済</label>
+          <input type="number" id="take_qr" min="0" step="1">
+        </div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">店内売上合計</div>
+        <div class="summary-value" id="sum_dine">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">テイクアウト売上合計</div>
+        <div class="summary-value" id="sum_take">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">売上総合計</div>
+        <div class="summary-value" id="sum_sales">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">現金合計</div>
+        <div class="summary-value" id="sum_cash">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">クレカ合計</div>
+        <div class="summary-value" id="sum_cc">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">iD／QUICPay合計</div>
+        <div class="summary-value" id="sum_id">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">交通系合計</div>
+        <div class="summary-value" id="sum_transit">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">QR決済合計</div>
+        <div class="summary-value" id="sum_qr">0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>人件費</h2>
+      <h3>スタッフ別入力</h3>
+      <div class="row">
+        <div class="field">
+          <label for="staffSelect">スタッフ名</label>
+          <select id="staffSelect">
+            <option value="">選択</option>
+            <option value="五十嵐">五十嵐</option>
+            <option value="石崎">石崎</option>
+            <option value="今井">今井</option>
+            <option value="竹村">竹村</option>
+            <option value="宍戸">宍戸</option>
+            <option value="佐藤(あ)">佐藤(あ)</option>
+            <option value="佐藤(ま)">佐藤(ま)</option>
+            <option value="花輪">花輪</option>
+            <option value="鈴木">鈴木</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="staffAmountInput">人件費（金額）</label>
+          <input type="number" id="staffAmountInput" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="staffNewNameInput">新しい名前を追加</label>
+          <input type="text" id="staffNewNameInput" placeholder="例：山田">
+        </div>
+        <div class="field">
+          <button type="button" class="secondary" id="addStaffNameBtn">名簿に追加</button>
+        </div>
+      </div>
+      <div class="button-row">
+        <button type="button" class="primary" id="addStaffRowBtn">人件費行を追加</button>
+      </div>
+
+      <table id="staffTable">
+        <thead>
+          <tr>
+            <th class="left">名前</th>
+            <th>金額</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+      <div class="summary-line">
+        <div class="summary-label">人件費合計</div>
+        <div class="summary-value" id="sum_staff">0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>その他の経費</h2>
+      <div class="row">
+        <div class="field">
+          <label for="exp_shiire">仕入れ</label>
+          <input type="number" id="exp_shiire" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_zappi">雑費</label>
+          <input type="number" id="exp_zappi" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_suido">水道光熱費</label>
+          <input type="number" id="exp_suido" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="exp_yachin">家賃</label>
+          <input type="number" id="exp_yachin" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_yakuin">役員報酬</label>
+          <input type="number" id="exp_yakuin" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_shain">社員給与</label>
+          <input type="number" id="exp_shain" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="exp_gas">ガソリン代</label>
+          <input type="number" id="exp_gas" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_kotsu">交通費</label>
+          <input type="number" id="exp_kotsu" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_fukuri">福利厚生費</label>
+          <input type="number" id="exp_fukuri" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="exp_sonpo">損保</label>
+          <input type="number" id="exp_sonpo" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_lease">リース</label>
+          <input type="number" id="exp_lease" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_shahoken">社会保険</label>
+          <input type="number" id="exp_shahoken" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="exp_tsushin">通信費</label>
+          <input type="number" id="exp_tsushin" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_shizei">市税</label>
+          <input type="number" id="exp_shizei" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="exp_kokko">金融公庫</label>
+          <input type="number" id="exp_kokko" min="0" step="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="exp_other_name">その他科目名</label>
+          <input type="text" id="exp_other_name" placeholder="例：広告費">
+        </div>
+        <div class="field">
+          <label for="exp_other_amount">その他金額</label>
+          <input type="number" id="exp_other_amount" min="0" step="1">
+        </div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">支出合計（人件費含む）</div>
+        <div class="summary-value" id="sum_expenses">0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>手数料と利益のまとめ</h2>
+      <div class="summary-line">
+        <div class="summary-label">クレカ手数料（2.48％）</div>
+        <div class="summary-value" id="fee_cc">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">iD／QUICPay手数料（3.24％）</div>
+        <div class="summary-value" id="fee_id">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">交通系手数料（2.95％）</div>
+        <div class="summary-value" id="fee_transit">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">QR手数料</div>
+        <div class="summary-value" id="fee_qr">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">決済手数料合計</div>
+        <div class="summary-value" id="fee_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">手数料差引後売上</div>
+        <div class="summary-value" id="net_sales">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">利益の目安（差引後売上 − 支出合計）</div>
+        <div class="summary-value" id="profit">0</div>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="primary" id="saveBtn">この日のデータを保存</button>
+        <button type="button" class="secondary" id="clearBtn">この日の入力をクリア</button>
+        <button type="button" class="secondary" id="exportBtn">CSVを書き出し</button>
+      </div>
+      <div class="status" id="statusMessage"></div>
+    </div>
+
+    <div class="card">
+      <h2>月次集計</h2>
+      <div class="row">
+        <div class="field">
+          <label for="monthInput">対象月</label>
+          <input type="month" id="monthInput">
+        </div>
+        <div class="field">
+          <div class="small-note">保存されている日別データから自動集計</div>
+        </div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">集計対象日数</div>
+        <div class="summary-value" id="m_days">0</div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">売上合計</div>
+        <div class="summary-value" id="m_sales_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">現金合計</div>
+        <div class="summary-value" id="m_cash_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">クレカ合計</div>
+        <div class="summary-value" id="m_cc_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">iD／QUICPay合計</div>
+        <div class="summary-value" id="m_id_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">交通系合計</div>
+        <div class="summary-value" id="m_transit_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">QR決済合計</div>
+        <div class="summary-value" id="m_qr_total">0</div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">クレカ手数料合計</div>
+        <div class="summary-value" id="m_fee_cc">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">iD／QUICPay手数料合計</div>
+        <div class="summary-value" id="m_fee_id">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">交通系手数料合計</div>
+        <div class="summary-value" id="m_fee_transit">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">QR手数料合計</div>
+        <div class="summary-value" id="m_fee_qr">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">決済手数料合計</div>
+        <div class="summary-value" id="m_fee_total">0</div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">人件費合計</div>
+        <div class="summary-value" id="m_staff_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">その他経費合計</div>
+        <div class="summary-value" id="m_otherexp_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">支出合計（人件費含む）</div>
+        <div class="summary-value" id="m_exp_total">0</div>
+      </div>
+
+      <div class="summary-line">
+        <div class="summary-label">手数料差引後売上</div>
+        <div class="summary-value" id="m_net_sales_total">0</div>
+      </div>
+      <div class="summary-line">
+        <div class="summary-label">月次利益の目安</div>
+        <div class="summary-value" id="m_profit_total">0</div>
+      </div>
+
+      <div class="status" id="monthStatus"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "shopLedger_simple_v1";
+    let staffRows = [];
+
+    function toNumber(id) {
+      const el = document.getElementById(id);
+      if (!el) return 0;
+      const v = parseFloat(String(el.value).replace(/,/g, ""));
+      return isNaN(v) ? 0 : v;
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = Number.isFinite(value) ? value.toLocaleString("ja-JP") : "0";
+    }
+
+    function calcFee(amount, rate) {
+      return Math.floor(amount * rate / 100);
+    }
+
+    function recalc() {
+      const dine_cash = toNumber("dine_cash");
+      const dine_cc = toNumber("dine_cc");
+      const dine_id = toNumber("dine_id");
+      const dine_transit = toNumber("dine_transit");
+      const dine_qr = toNumber("dine_qr");
+
+      const take_cash = toNumber("take_cash");
+      const take_cc = toNumber("take_cc");
+      const take_id = toNumber("take_id");
+      const take_transit = toNumber("take_transit");
+      const take_qr = toNumber("take_qr");
+
+      const sum_dine = dine_cash + dine_cc + dine_id + dine_transit + dine_qr;
+      const sum_take = take_cash + take_cc + take_id + take_transit + take_qr;
+      const sum_sales = sum_dine + sum_take;
+
+      const sum_cash = dine_cash + take_cash;
+      const sum_cc = dine_cc + take_cc;
+      const sum_id = dine_id + take_id;
+      const sum_transit = dine_transit + take_transit;
+      const sum_qr = dine_qr + take_qr;
+
+      setText("sum_dine", sum_dine);
+      setText("sum_take", sum_take);
+      setText("sum_sales", sum_sales);
+      setText("sum_cash", sum_cash);
+      setText("sum_cc", sum_cc);
+      setText("sum_id", sum_id);
+      setText("sum_transit", sum_transit);
+      setText("sum_qr", sum_qr);
+
+      let staffTotal = 0;
+      for (const r of staffRows) {
+        staffTotal += r.amount;
+      }
+      setText("sum_staff", staffTotal);
+
+      const exp_ids = [
+        "exp_shiire", "exp_zappi", "exp_suido", "exp_yachin", "exp_yakuin",
+        "exp_shain", "exp_gas", "exp_kotsu", "exp_fukuri", "exp_sonpo",
+        "exp_lease", "exp_shahoken", "exp_tsushin", "exp_shizei", "exp_kokko",
+        "exp_other_amount"
+      ];
+      let otherExpTotal = 0;
+      for (const id of exp_ids) {
+        otherExpTotal += toNumber(id);
+      }
+      const expTotal = staffTotal + otherExpTotal;
+      setText("sum_expenses", expTotal);
+
+      const fee_cc = calcFee(sum_cc, 2.48);
+      const fee_id = calcFee(sum_id, 3.24);
+      const fee_transit = calcFee(sum_transit, 2.95);
+      const qrRateInput = document.getElementById("qrRateInput");
+      const qrRate = qrRateInput ? parseFloat(qrRateInput.value) || 0 : 0;
+      const fee_qr = calcFee(sum_qr, qrRate);
+      const fee_total = fee_cc + fee_id + fee_transit + fee_qr;
+      const net_sales = sum_sales - fee_total;
+      const profit = net_sales - expTotal;
+
+      setText("fee_cc", fee_cc);
+      setText("fee_id", fee_id);
+      setText("fee_transit", fee_transit);
+      setText("fee_qr", fee_qr);
+      setText("fee_total", fee_total);
+      setText("net_sales", net_sales);
+      setText("profit", profit);
+    }
+
+    function renderStaffTable() {
+      const tbody = document.querySelector("#staffTable tbody");
+      tbody.innerHTML = "";
+      staffRows.forEach((row, index) => {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.className = "left";
+        tdName.textContent = row.name;
+
+        const tdAmount = document.createElement("td");
+        tdAmount.textContent = row.amount.toLocaleString("ja-JP");
+
+        const tdAction = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.textContent = "削除";
+        btn.className = "danger";
+        btn.style.fontSize = "10px";
+        btn.onclick = () => {
+          staffRows.splice(index, 1);
+          renderStaffTable();
+          recalc();
+          recalcMonthly();
+        };
+        tdAction.appendChild(btn);
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdAmount);
+        tr.appendChild(tdAction);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addStaffRow() {
+      const sel = document.getElementById("staffSelect");
+      const amountInput = document.getElementById("staffAmountInput");
+      const name = sel.value;
+      const amount = parseFloat(amountInput.value);
+      const status = document.getElementById("statusMessage");
+
+      if (!name) {
+        status.textContent = "スタッフ名を選択してください。";
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        status.textContent = "人件費の金額を正しく入力してください。";
+        return;
+      }
+      staffRows.push({ name, amount });
+      amountInput.value = "";
+      renderStaffTable();
+      recalc();
+      recalcMonthly();
+      status.textContent = "";
+    }
+
+    function addStaffName() {
+      const input = document.getElementById("staffNewNameInput");
+      const name = input.value.trim();
+      const status = document.getElementById("statusMessage");
+      if (!name) {
+        status.textContent = "追加する名前を入力してください。";
+        return;
+      }
+      const sel = document.getElementById("staffSelect");
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === name) {
+          status.textContent = "同じ名前がすでに登録されています。";
+          return;
+        }
+      }
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+      sel.value = name;
+      input.value = "";
+      status.textContent = "新しい名前を名簿に追加しました。";
+    }
+
+    function getAllData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return {};
+        return JSON.parse(raw);
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveAllData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function saveCurrentDay() {
+      const dateEl = document.getElementById("dateInput");
+      const status = document.getElementById("statusMessage");
+      const date = dateEl.value;
+      if (!date) {
+        status.textContent = "日付を入力してください。";
+        return;
+      }
+
+      const data = getAllData();
+
+      const record = {
+        qrRate: parseFloat(document.getElementById("qrRateInput").value) || 0,
+        sales: {
+          dine: {
+            cash: toNumber("dine_cash"),
+            cc: toNumber("dine_cc"),
+            id: toNumber("dine_id"),
+            transit: toNumber("dine_transit"),
+            qr: toNumber("dine_qr")
+          },
+          take: {
+            cash: toNumber("take_cash"),
+            cc: toNumber("take_cc"),
+            id: toNumber("take_id"),
+            transit: toNumber("take_transit"),
+            qr: toNumber("take_qr")
+          }
+        },
+        staffRows: staffRows.map(r => ({ name: r.name, amount: r.amount })),
+        expenses: {
+          shiire: toNumber("exp_shiire"),
+          zappi: toNumber("exp_zappi"),
+          suido: toNumber("exp_suido"),
+          yachin: toNumber("exp_yachin"),
+          yakuin: toNumber("exp_yakuin"),
+          shain: toNumber("exp_shain"),
+          gas: toNumber("exp_gas"),
+          kotsu: toNumber("exp_kotsu"),
+          fukuri: toNumber("exp_fukuri"),
+          sonpo: toNumber("exp_sonpo"),
+          lease: toNumber("exp_lease"),
+          shahoken: toNumber("exp_shahoken"),
+          tsushin: toNumber("exp_tsushin"),
+          shizei: toNumber("exp_shizei"),
+          kokko: toNumber("exp_kokko"),
+          otherName: document.getElementById("exp_other_name").value,
+          otherAmount: toNumber("exp_other_amount")
+        }
+      };
+
+      data[date] = record;
+      saveAllData(data);
+      status.textContent = "保存しました。";
+
+      recalcMonthly();
+    }
+
+    function clearInputsForCurrentDay() {
+      const ids = [
+        "dine_cash","dine_cc","dine_id","dine_transit","dine_qr",
+        "take_cash","take_cc","take_id","take_transit","take_qr",
+        "exp_shiire","exp_zappi","exp_suido","exp_yachin","exp_yakuin",
+        "exp_shain","exp_gas","exp_kotsu","exp_fukuri","exp_sonpo",
+        "exp_lease","exp_shahoken","exp_tsushin","exp_shizei","exp_kokko",
+        "exp_other_amount"
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      document.getElementById("exp_other_name").value = "";
+      staffRows = [];
+      renderStaffTable();
+      recalc();
+      recalcMonthly();
+      const status = document.getElementById("statusMessage");
+      status.textContent = "この日の入力をクリアしました。（保存データは消していません）";
+    }
+
+    function loadDay(date) {
+      const status = document.getElementById("statusMessage");
+      const all = getAllData();
+      const rec = all[date];
+      staffRows = [];
+      if (!rec) {
+        clearInputsForCurrentDay();
+        status.textContent = "この日の保存データはありません。新規入力です。";
+        return;
+      }
+
+      document.getElementById("qrRateInput").value = rec.qrRate;
+
+      document.getElementById("dine_cash").value = rec.sales.dine.cash || "";
+      document.getElementById("dine_cc").value = rec.sales.dine.cc || "";
+      document.getElementById("dine_id").value = rec.sales.dine.id || "";
+      document.getElementById("dine_transit").value = rec.sales.dine.transit || "";
+      document.getElementById("dine_qr").value = rec.sales.dine.qr || "";
+
+      document.getElementById("take_cash").value = rec.sales.take.cash || "";
+      document.getElementById("take_cc").value = rec.sales.take.cc || "";
+      document.getElementById("take_id").value = rec.sales.take.id || "";
+      document.getElementById("take_transit").value = rec.sales.take.transit || "";
+      document.getElementById("take_qr").value = rec.sales.take.qr || "";
+
+      staffRows = Array.isArray(rec.staffRows) ? rec.staffRows.map(r => ({
+        name: r.name,
+        amount: Number(r.amount) || 0
+      })) : [];
+      renderStaffTable();
+
+      const ex = rec.expenses || {};
+      document.getElementById("exp_shiire").value = ex.shiire || "";
+      document.getElementById("exp_zappi").value = ex.zappi || "";
+      document.getElementById("exp_suido").value = ex.suido || "";
+      document.getElementById("exp_yachin").value = ex.yachin || "";
+      document.getElementById("exp_yakuin").value = ex.yakuin || "";
+      document.getElementById("exp_shain").value = ex.shain || "";
+      document.getElementById("exp_gas").value = ex.gas || "";
+      document.getElementById("exp_kotsu").value = ex.kotsu || "";
+      document.getElementById("exp_fukuri").value = ex.fukuri || "";
+      document.getElementById("exp_sonpo").value = ex.sonpo || "";
+      document.getElementById("exp_lease").value = ex.lease || "";
+      document.getElementById("exp_shahoken").value = ex.shahoken || "";
+      document.getElementById("exp_tsushin").value = ex.tsushin || "";
+      document.getElementById("exp_shizei").value = ex.shizei || "";
+      document.getElementById("exp_kokko").value = ex.kokko || "";
+      document.getElementById("exp_other_name").value = ex.otherName || "";
+      document.getElementById("exp_other_amount").value = ex.otherAmount || "";
+
+      recalc();
+      recalcMonthly();
+      status.textContent = "保存されているこの日のデータを読み込みました。";
+    }
+
+    function setToday() {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, "0");
+      const d = String(today.getDate()).padStart(2, "0");
+      const dateEl = document.getElementById("dateInput");
+      if (dateEl) dateEl.value = `${y}-${m}-${d}`;
+    }
+
+    function setCurrentMonth() {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, "0");
+      const monthEl = document.getElementById("monthInput");
+      if (monthEl) monthEl.value = `${y}-${m}`;
+    }
+
+    function csvCell(value) {
+      const s = value === undefined || value === null ? "" : String(value);
+      const escaped = s.replace(/"/g, '""');
+      return `"${escaped}"`;
+    }
+
+    function exportCsv() {
+      const status = document.getElementById("statusMessage");
+      const all = getAllData();
+      const dates = Object.keys(all).sort();
+      if (dates.length === 0) {
+        status.textContent = "書き出す保存データがありません。";
+        return;
+      }
+
+      const header = [
+        "date",
+        "qrRate",
+        "dine_cash","dine_cc","dine_id","dine_transit","dine_qr",
+        "take_cash","take_cc","take_id","take_transit","take_qr",
+        "sales_dine_total","sales_take_total","sales_total",
+        "cash_total","cc_total","id_total","transit_total","qr_total",
+        "fee_cc","fee_id","fee_transit","fee_qr","fee_total",
+        "net_sales",
+        "staff_total","staff_detail",
+        "exp_shiire","exp_zappi","exp_suido","exp_yachin","exp_yakuin",
+        "exp_shain","exp_gas","exp_kotsu","exp_fukuri","exp_sonpo",
+        "exp_lease","exp_shahoken","exp_tsushin","exp_shizei","exp_kokko",
+        "exp_other_name","exp_other_amount",
+        "expense_total",
+        "profit"
+      ];
+
+      const rows = [];
+      rows.push(header.map(csvCell).join(","));
+
+      dates.forEach(date => {
+        const rec = all[date] || {};
+        const qrRate = Number(rec.qrRate) || 0;
+
+        const dine = (rec.sales && rec.sales.dine) || {};
+        const take = (rec.sales && rec.sales.take) || {};
+
+        const dine_cash = Number(dine.cash) || 0;
+        const dine_cc = Number(dine.cc) || 0;
+        const dine_id = Number(dine.id) || 0;
+        const dine_transit = Number(dine.transit) || 0;
+        const dine_qr = Number(dine.qr) || 0;
+
+        const take_cash = Number(take.cash) || 0;
+        const take_cc = Number(take.cc) || 0;
+        const take_id = Number(take.id) || 0;
+        const take_transit = Number(take.transit) || 0;
+        const take_qr = Number(take.qr) || 0;
+
+        const sum_dine = dine_cash + dine_cc + dine_id + dine_transit + dine_qr;
+        const sum_take = take_cash + take_cc + take_id + take_transit + take_qr;
+        const sum_sales = sum_dine + sum_take;
+
+        const sum_cash = dine_cash + take_cash;
+        const sum_cc = dine_cc + take_cc;
+        const sum_id = dine_id + take_id;
+        const sum_transit = dine_transit + take_transit;
+        const sum_qr = dine_qr + take_qr;
+
+        const fee_cc = calcFee(sum_cc, 2.48);
+        const fee_id = calcFee(sum_id, 3.24);
+        const fee_transit = calcFee(sum_transit, 2.95);
+        const fee_qr = calcFee(sum_qr, qrRate);
+        const fee_total = fee_cc + fee_id + fee_transit + fee_qr;
+        const net_sales = sum_sales - fee_total;
+
+        let staff_total = 0;
+        let staff_detail_parts = [];
+        if (Array.isArray(rec.staffRows)) {
+          rec.staffRows.forEach(r => {
+            const name = r.name || "";
+            const amt = Number(r.amount) || 0;
+            staff_total += amt;
+            if (name) {
+              staff_detail_parts.push(`${name}:${amt}`);
+            }
+          });
+        }
+        const staff_detail = staff_detail_parts.join("|");
+
+        const ex = rec.expenses || {};
+        const exp_shiire = Number(ex.shiire) || 0;
+        const exp_zappi = Number(ex.zappi) || 0;
+        const exp_suido = Number(ex.suido) || 0;
+        const exp_yachin = Number(ex.yachin) || 0;
+        const exp_yakuin = Number(ex.yakuin) || 0;
+        const exp_shain = Number(ex.shain) || 0;
+        const exp_gas = Number(ex.gas) || 0;
+        const exp_kotsu = Number(ex.kotsu) || 0;
+        const exp_fukuri = Number(ex.fukuri) || 0;
+        const exp_sonpo = Number(ex.sonpo) || 0;
+        const exp_lease = Number(ex.lease) || 0;
+        const exp_shahoken = Number(ex.shahoken) || 0;
+        const exp_tsushin = Number(ex.tsushin) || 0;
+        const exp_shizei = Number(ex.shizei) || 0;
+        const exp_kokko = Number(ex.kokko) || 0;
+        const exp_other_name = ex.otherName || "";
+        const exp_other_amount = Number(ex.otherAmount) || 0;
+
+        const otherExpTotal =
+          exp_shiire + exp_zappi + exp_suido + exp_yachin + exp_yakuin +
+          exp_shain + exp_gas + exp_kotsu + exp_fukuri + exp_sonpo +
+          exp_lease + exp_shahoken + exp_tsushin + exp_shizei + exp_kokko +
+          exp_other_amount;
+
+        const expense_total = staff_total + otherExpTotal;
+        const profit = net_sales - expense_total;
+
+        const row = [
+          date,
+          qrRate,
+          dine_cash,dine_cc,dine_id,dine_transit,dine_qr,
+          take_cash,take_cc,take_id,take_transit,take_qr,
+          sum_dine,sum_take,sum_sales,
+          sum_cash,sum_cc,sum_id,sum_transit,sum_qr,
+          fee_cc,fee_id,fee_transit,fee_qr,fee_total,
+          net_sales,
+          staff_total,staff_detail,
+          exp_shiire,exp_zappi,exp_suido,exp_yachin,exp_yakuin,
+          exp_shain,exp_gas,exp_kotsu,exp_fukuri,exp_sonpo,
+          exp_lease,exp_shahoken,exp_tsushin,exp_shizei,exp_kokko,
+          exp_other_name,exp_other_amount,
+          expense_total,
+          profit
+        ];
+
+        rows.push(row.map(csvCell).join(","));
+      });
+
+      const csvContent = "\uFEFF" + rows.join("\r\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "shop_ledger_export.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      status.textContent = "保存されている全ての日付をCSVに書き出しました。";
+    }
+
+    function zeroMonthly() {
+      setText("m_days", 0);
+      setText("m_sales_total", 0);
+      setText("m_cash_total", 0);
+      setText("m_cc_total", 0);
+      setText("m_id_total", 0);
+      setText("m_transit_total", 0);
+      setText("m_qr_total", 0);
+      setText("m_fee_cc", 0);
+      setText("m_fee_id", 0);
+      setText("m_fee_transit", 0);
+      setText("m_fee_qr", 0);
+      setText("m_fee_total", 0);
+      setText("m_staff_total", 0);
+      setText("m_otherexp_total", 0);
+      setText("m_exp_total", 0);
+      setText("m_net_sales_total", 0);
+      setText("m_profit_total", 0);
+    }
+
+    function recalcMonthly() {
+      const all = getAllData();
+      const monthEl = document.getElementById("monthInput");
+      const statusEl = document.getElementById("monthStatus");
+      if (!monthEl) return;
+      const mv = monthEl.value;
+      if (!mv) {
+        zeroMonthly();
+        if (statusEl) statusEl.textContent = "対象月を選択してください。";
+        return;
+      }
+
+      const prefix = mv; // "YYYY-MM"
+      const dates = Object.keys(all).filter(d => d.startsWith(prefix)).sort();
+
+      if (dates.length === 0) {
+        zeroMonthly();
+        if (statusEl) statusEl.textContent = "この月の保存データはありません。";
+        return;
+      }
+
+      let days = 0;
+      let sales_total = 0;
+      let cash_total = 0;
+      let cc_total = 0;
+      let id_total = 0;
+      let transit_total = 0;
+      let qr_total = 0;
+
+      let fee_cc_total = 0;
+      let fee_id_total = 0;
+      let fee_transit_total = 0;
+      let fee_qr_total = 0;
+      let fee_total_all = 0;
+
+      let staff_total_all = 0;
+      let otherexp_total_all = 0;
+      let exp_total_all = 0;
+
+      let net_sales_total = 0;
+      let profit_total = 0;
+
+      dates.forEach(date => {
+        const rec = all[date] || {};
+        const qrRate = Number(rec.qrRate) || 0;
+
+        const dine = (rec.sales && rec.sales.dine) || {};
+        const take = (rec.sales && rec.sales.take) || {};
+
+        const dine_cash = Number(dine.cash) || 0;
+        const dine_cc = Number(dine.cc) || 0;
+        const dine_id = Number(dine.id) || 0;
+        const dine_transit = Number(dine.transit) || 0;
+        const dine_qr = Number(dine.qr) || 0;
+
+        const take_cash = Number(take.cash) || 0;
+        const take_cc = Number(take.cc) || 0;
+        const take_id = Number(take.id) || 0;
+        const take_transit = Number(take.transit) || 0;
+        const take_qr = Number(take.qr) || 0;
+
+        const sum_dine = dine_cash + dine_cc + dine_id + dine_transit + dine_qr;
+        const sum_take = take_cash + take_cc + take_id + take_transit + take_qr;
+        const sum_sales = sum_dine + sum_take;
+
+        const sum_cash = dine_cash + take_cash;
+        const sum_cc = dine_cc + take_cc;
+        const sum_id = dine_id + take_id;
+        const sum_transit = dine_transit + take_transit;
+        const sum_qr = dine_qr + take_qr;
+
+        const fee_cc = calcFee(sum_cc, 2.48);
+        const fee_id = calcFee(sum_id, 3.24);
+        const fee_transit = calcFee(sum_transit, 2.95);
+        const fee_qr = calcFee(sum_qr, qrRate);
+        const fee_total = fee_cc + fee_id + fee_transit + fee_qr;
+        const net_sales = sum_sales - fee_total;
+
+        let staff_total = 0;
+        if (Array.isArray(rec.staffRows)) {
+          rec.staffRows.forEach(r => {
+            staff_total += Number(r.amount) || 0;
+          });
+        }
+
+        const ex = rec.expenses || {};
+        const exp_shiire = Number(ex.shiire) || 0;
+        const exp_zappi = Number(ex.zappi) || 0;
+        const exp_suido = Number(ex.suido) || 0;
+        const exp_yachin = Number(ex.yachin) || 0;
+        const exp_yakuin = Number(ex.yakuin) || 0;
+        const exp_shain = Number(ex.shain) || 0;
+        const exp_gas = Number(ex.gas) || 0;
+        const exp_kotsu = Number(ex.kotsu) || 0;
+        const exp_fukuri = Number(ex.fukuri) || 0;
+        const exp_sonpo = Number(ex.sonpo) || 0;
+        const exp_lease = Number(ex.lease) || 0;
+        const exp_shahoken = Number(ex.shahoken) || 0;
+        const exp_tsushin = Number(ex.tsushin) || 0;
+        const exp_shizei = Number(ex.shizei) || 0;
+        const exp_kokko = Number(ex.kokko) || 0;
+        const exp_other_amount = Number(ex.otherAmount) || 0;
+
+        const otherExpTotal =
+          exp_shiire + exp_zappi + exp_suido + exp_yachin + exp_yakuin +
+          exp_shain + exp_gas + exp_kotsu + exp_fukuri + exp_sonpo +
+          exp_lease + exp_shahoken + exp_tsushin + exp_shizei + exp_kokko +
+          exp_other_amount;
+
+        const expense_total = staff_total + otherExpTotal;
+        const profit = net_sales - expense_total;
+
+        days += 1;
+        sales_total += sum_sales;
+        cash_total += sum_cash;
+        cc_total += sum_cc;
+        id_total += sum_id;
+        transit_total += sum_transit;
+        qr_total += sum_qr;
+
+        fee_cc_total += fee_cc;
+        fee_id_total += fee_id;
+        fee_transit_total += fee_transit;
+        fee_qr_total += fee_qr;
+        fee_total_all += fee_total;
+
+        staff_total_all += staff_total;
+        otherexp_total_all += otherExpTotal;
+        exp_total_all += expense_total;
+
+        net_sales_total += net_sales;
+        profit_total += profit;
+      });
+
+      setText("m_days", days);
+      setText("m_sales_total", sales_total);
+      setText("m_cash_total", cash_total);
+      setText("m_cc_total", cc_total);
+      setText("m_id_total", id_total);
+      setText("m_transit_total", transit_total);
+      setText("m_qr_total", qr_total);
+      setText("m_fee_cc", fee_cc_total);
+      setText("m_fee_id", fee_id_total);
+      setText("m_fee_transit", fee_transit_total);
+      setText("m_fee_qr", fee_qr_total);
+      setText("m_fee_total", fee_total_all);
+      setText("m_staff_total", staff_total_all);
+      setText("m_otherexp_total", otherexp_total_all);
+      setText("m_exp_total", exp_total_all);
+      setText("m_net_sales_total", net_sales_total);
+      setText("m_profit_total", profit_total);
+
+      if (statusEl) {
+        statusEl.textContent = `${days}日分のデータを集計しました。`;
+      }
+    }
+
+    function attachEvents() {
+      const numberIds = [
+        "dine_cash","dine_cc","dine_id","dine_transit","dine_qr",
+        "take_cash","take_cc","take_id","take_transit","take_qr",
+        "exp_shiire","exp_zappi","exp_suido","exp_yachin","exp_yakuin",
+        "exp_shain","exp_gas","exp_kotsu","exp_fukuri","exp_sonpo",
+        "exp_lease","exp_shahoken","exp_tsushin","exp_shizei","exp_kokko",
+        "exp_other_amount","qrRateInput"
+      ];
+      numberIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", () => {
+          recalc();
+          recalcMonthly();
+        });
+      });
+
+      document.getElementById("addStaffRowBtn")
+        .addEventListener("click", addStaffRow);
+      document.getElementById("addStaffNameBtn")
+        .addEventListener("click", addStaffName);
+      document.getElementById("saveBtn")
+        .addEventListener("click", saveCurrentDay);
+      document.getElementById("clearBtn")
+        .addEventListener("click", clearInputsForCurrentDay);
+      document.getElementById("exportBtn")
+        .addEventListener("click", exportCsv);
+
+      document.getElementById("dateInput")
+        .addEventListener("change", (e) => {
+          const date = e.target.value;
+          if (date) loadDay(date);
+        });
+
+      const monthEl = document.getElementById("monthInput");
+      if (monthEl) {
+        monthEl.addEventListener("change", recalcMonthly);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      setToday();
+      setCurrentMonth();
+      attachEvents();
+      const dateInput = document.getElementById("dateInput");
+      if (dateInput && dateInput.value) {
+        loadDay(dateInput.value);
+      } else {
+        recalc();
+      }
+      recalcMonthly();
+    });
+  </script>
+</body>
+</html>
